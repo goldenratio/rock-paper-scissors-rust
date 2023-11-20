@@ -4,7 +4,7 @@ mod handlers;
 use crate::app_state::{AppState, GameCreator};
 use crate::handlers::create::create;
 use crate::handlers::game_action::game_action;
-use crate::handlers::game_status::game_status;
+use crate::handlers::game_events::game_events;
 use crate::handlers::join::join;
 use actix_web::{get, web, App, HttpResponse, HttpServer, Responder};
 use std::collections::HashMap;
@@ -28,7 +28,7 @@ async fn main() -> std::io::Result<()> {
             .service(create)
             .service(join)
             .service(game_action)
-            .service(game_status)
+            .service(game_events)
             .service(index)
     })
     .bind(("127.0.0.1", 8080))?

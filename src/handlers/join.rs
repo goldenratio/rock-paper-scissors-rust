@@ -1,3 +1,4 @@
+use crate::enum_types::GameJoinErrorType;
 use crate::AppState;
 use actix_web::{post, web, HttpRequest, Responder};
 use serde::{Deserialize, Serialize};
@@ -11,20 +12,16 @@ struct GameJoinRequestData {
 }
 
 #[derive(Serialize)]
-enum GameJoinErrorType {
-    InvalidGameId,
-    PlayerAlreadyJoined,
-    GenericError,
-}
-
-#[derive(Serialize)]
 enum GameJoinResponseData {
+    #[serde(rename = "data")]
     Success {
         #[serde(rename = "playerToken")]
         player_token: String,
     },
+    #[serde(rename = "data")]
     Error {
-        error: GameJoinErrorType,
+        #[serde(rename = "error")]
+        error_type: GameJoinErrorType,
     },
 }
 
@@ -38,10 +35,20 @@ async fn join(
     println!("/join Received data: {:?}", payload);
 
     let mut game_creator = state.game_creator.lock().unwrap();
-    let player_token = game_creator.create_new_player_token().unwrap();
+    let mut gameplay_manager = state.gameplay_manager.lock().unwrap();
 
-    let response_data = GameJoinResponseData::Success {
-        player_token,
+    let response_data = match game_creator.create_new_player_token() {
+        Ok(player_token) => {
+            match gameplay_manager.join_game(&payload.game_id, &player_token, &payload.player_name)
+            {
+                Ok(_) => GameJoinResponseData::Success { player_token },
+                Err(error_type) => GameJoinResponseData::Error { error_type },
+            }
+        }
+        Err(_) => GameJoinResponseData::Error {
+            error_type: GameJoinErrorType::GenericError,
+        },
     };
+
     return web::Json(response_data);
 }

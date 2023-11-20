@@ -1,3 +1,4 @@
+use crate::enum_types::GameActionErrorType;
 use actix_web::{post, web, HttpResponse, Responder};
 use serde::{Deserialize, Serialize};
 
@@ -10,16 +11,14 @@ struct GameActionRequestData {
 }
 
 #[derive(Serialize)]
-enum GameActionErrorType {
-    InvalidGameId,
-    NotYourTurn,
-    GenericError,
-}
-
-#[derive(Serialize)]
 enum GameActionResponseData {
+    #[serde(rename = "data")]
     Success {},
-    Error { error: GameActionErrorType },
+    #[serde(rename = "data")]
+    Error {
+        #[serde(rename = "error")]
+        error_type: GameActionErrorType,
+    },
 }
 
 #[post("/game_action")]

@@ -7,10 +7,12 @@ use crate::handlers::create::create;
 use crate::handlers::game_action::game_action;
 use crate::handlers::game_events::game_events;
 use crate::handlers::join::join;
-use actix_files::Files;
 use actix_web::{web, App, HttpServer, Responder};
+use actix_web_static_files::ResourceFiles;
 use std::collections::HashMap;
 use std::sync::Mutex;
+
+include!(concat!(env!("OUT_DIR"), "/generated.rs"));
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -25,6 +27,7 @@ async fn main() -> std::io::Result<()> {
     });
 
     HttpServer::new(move || {
+        let generated = generate();
         App::new()
             .app_data(app_data.clone())
             .service(
@@ -34,7 +37,7 @@ async fn main() -> std::io::Result<()> {
                     .service(game_action)
                     .service(game_events),
             )
-            .service(Files::new("/", "./client/").index_file("index.html"))
+            .service(ResourceFiles::new("/", generated))
     })
     .bind(("127.0.0.1", 8080))?
     .run()

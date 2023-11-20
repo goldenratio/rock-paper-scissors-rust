@@ -77,29 +77,21 @@ impl GameplayManager {
         player_token: &String,
         player_display_name: &String,
     ) -> Result<(), GameJoinErrorType> {
-        match self.game_entries.get_mut(game_id) {
-            Some(game_entry) => {
-                if game_entry.player_1.player_token.is_empty()
-                    && game_entry.player_1.player_token != game_entry.player_2.player_token
-                {
-                    game_entry.player_1.player_token = player_token.to_string();
-                    game_entry.player_1.display_name = player_display_name.to_string();
-                } else if game_entry.player_2.player_token.is_empty()
-                    && game_entry.player_2.player_token != game_entry.player_1.player_token
-                {
-                    game_entry.player_2.player_token = player_token.to_string();
-                    game_entry.player_2.display_name = player_display_name.to_string();
-                } else {
-                    // no player slot available
-                    println!("player already joined! {:?}", player_display_name);
-                    // TODO: add reconnect
-                    return Err(GameJoinErrorType::PlayerAlreadyJoined);
-                }
+        if !self.game_entries.contains_key(game_id) {
+            return Err(GameJoinErrorType::InvalidGameId);
+        }
+
+        match self.get_mut_player_slot_to_join(game_id, player_token) {
+            Some(player_slot) => {
+                player_slot.player_token = player_token.to_string();
+                player_slot.display_name = player_display_name.to_string();
             }
             None => {
-                return Err(GameJoinErrorType::InvalidGameId);
+                println!("no free player slot found! {:?}", player_display_name);
+                return Err(GameJoinErrorType::GameRoomFull);
             }
-        }
+        };
+
         println!("game entries {:?}", self.game_entries);
         Ok(())
     }
@@ -128,7 +120,30 @@ impl GameplayManager {
                 }
             }
             _ => {}
-        }
+        };
+        None
+    }
+
+    fn get_mut_player_slot_to_join(
+        &mut self,
+        game_id: &String,
+        player_token: &String,
+    ) -> Option<&mut PlayerInfo> {
+        match self.game_entries.get_mut(game_id) {
+            Some(game_entry) => {
+                if game_entry.player_1.player_token.is_empty()
+                    || game_entry.player_1.player_token == player_token.to_string()
+                {
+                    return Some(&mut game_entry.player_1);
+                }
+                if game_entry.player_2.player_token.is_empty()
+                    || game_entry.player_2.player_token == player_token.to_string()
+                {
+                    return Some(&mut game_entry.player_2);
+                }
+            }
+            _ => {}
+        };
         None
     }
 }

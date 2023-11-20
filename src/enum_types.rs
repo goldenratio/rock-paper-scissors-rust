@@ -23,6 +23,6 @@ pub enum GameActionErrorType {
 #[derive(Serialize)]
 pub enum GameJoinErrorType {
     InvalidGameId,
-    PlayerAlreadyJoined,
+    GameRoomFull,
     GenericError,
 }

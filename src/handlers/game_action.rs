@@ -1,4 +1,4 @@
-use crate::error_enums::GameActionErrorType;
+use crate::error_enums::GameActionError;
 use actix_web::{post, web, HttpResponse, Responder};
 use serde::{Deserialize, Serialize};
 
@@ -17,7 +17,7 @@ enum GameActionResponseData {
     #[serde(rename = "data")]
     Error {
         #[serde(rename = "error")]
-        error_type: GameActionErrorType,
+        error_type: GameActionError,
     },
 }
 

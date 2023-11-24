@@ -1,4 +1,4 @@
-use crate::error_enums::{CreateGameErrorType, GameJoinErrorType};
+use crate::error_enums::{CreateGameError, GameJoinError};
 use std::collections::HashMap;
 
 #[derive(Debug)]
@@ -27,9 +27,9 @@ pub struct GameplayManager {
 }
 
 impl GameplayManager {
-    pub fn register_game(&mut self, game_id: &String) -> Result<(), CreateGameErrorType> {
+    pub fn register_game(&mut self, game_id: &String) -> Result<(), CreateGameError> {
         if self.game_entries.contains_key(game_id) {
-            return Err(CreateGameErrorType::GameAlreadyExist);
+            return Err(CreateGameError::GameAlreadyExist);
         }
 
         let key = game_id.clone();
@@ -54,9 +54,9 @@ impl GameplayManager {
         game_id: &String,
         player_token: &String,
         player_display_name: &String,
-    ) -> Result<(), GameJoinErrorType> {
+    ) -> Result<(), GameJoinError> {
         if !self.game_entries.contains_key(game_id) {
-            return Err(GameJoinErrorType::InvalidGameId);
+            return Err(GameJoinError::InvalidGameId);
         }
 
         match self.get_mut_player_slot_to_join(game_id, player_token) {
@@ -66,7 +66,7 @@ impl GameplayManager {
             }
             None => {
                 println!("no free player slot found! {:?}", player_display_name);
-                return Err(GameJoinErrorType::GameRoomFull);
+                return Err(GameJoinError::GameRoomFull);
             }
         };
 

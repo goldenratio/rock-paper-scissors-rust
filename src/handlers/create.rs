@@ -1,5 +1,5 @@
 use crate::app_state::AppState;
-use crate::error_enums::CreateGameErrorType;
+use crate::error_enums::CreateGameError;
 use actix_web::{get, web, Responder};
 use serde::Serialize;
 
@@ -13,7 +13,7 @@ enum CreateGameResponseData {
     #[serde(rename = "data")]
     Error {
         #[serde(rename = "error")]
-        error_type: CreateGameErrorType,
+        error_type: CreateGameError,
     },
 }
 
@@ -28,7 +28,7 @@ async fn create(state: web::Data<AppState>) -> impl Responder {
             Err(error_type) => CreateGameResponseData::Error { error_type },
         },
         Err(_) => CreateGameResponseData::Error {
-            error_type: CreateGameErrorType::GenericError,
+            error_type: CreateGameError::GenericError,
         },
     };
 

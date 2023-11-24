@@ -1,20 +1,20 @@
 use serde::Serialize;
 
 #[derive(Serialize, Debug)]
-pub enum CreateGameErrorType {
+pub enum CreateGameError {
     GameAlreadyExist,
     GenericError,
 }
 
 #[derive(Serialize)]
-pub enum GameActionErrorType {
+pub enum GameActionError {
     InvalidGameId,
     NotYourTurn,
     GenericError,
 }
 
 #[derive(Serialize)]
-pub enum GameJoinErrorType {
+pub enum GameJoinError {
     InvalidGameId,
     GameRoomFull,
     GenericError,

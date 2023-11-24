@@ -1,4 +1,4 @@
-use crate::error_enums::GameJoinErrorType;
+use crate::error_enums::GameJoinError;
 use crate::AppState;
 use actix_web::{post, web, HttpRequest, Responder};
 use serde::{Deserialize, Serialize};
@@ -21,7 +21,7 @@ enum GameJoinResponseData {
     #[serde(rename = "data")]
     Error {
         #[serde(rename = "error")]
-        error_type: GameJoinErrorType,
+        error_type: GameJoinError,
     },
 }
 
@@ -46,7 +46,7 @@ async fn join(
             }
         }
         Err(_) => GameJoinResponseData::Error {
-            error_type: GameJoinErrorType::GenericError,
+            error_type: GameJoinError::GenericError,
         },
     };
 

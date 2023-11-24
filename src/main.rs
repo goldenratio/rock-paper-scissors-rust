@@ -36,7 +36,6 @@ async fn main() -> std::io::Result<()> {
         gameplay_manager: Mutex::new(GameplayManager {
             game_entries: HashMap::new(),
         }),
-        // server_handle: Mutex::new(None),
     });
 
     let server = HttpServer::new(move || {
@@ -59,9 +58,6 @@ async fn main() -> std::io::Result<()> {
     })
     .bind(("127.0.0.1", 8080))?
     .run();
-
-    // register the server handle with the stop handle
-    // app_data.register_server(server.handle());
 
     // run server until stopped (either by ctrl-c or stop endpoint)
     server.await

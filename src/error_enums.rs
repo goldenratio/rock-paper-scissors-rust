@@ -1,12 +1,5 @@
 use serde::Serialize;
 
-#[derive(Debug)]
-pub enum PlayerAction {
-    Rock,
-    Paper,
-    Scissors,
-}
-
 #[derive(Serialize, Debug)]
 pub enum CreateGameErrorType {
     GameAlreadyExist,

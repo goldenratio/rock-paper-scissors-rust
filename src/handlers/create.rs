@@ -1,5 +1,5 @@
 use crate::app_state::AppState;
-use crate::enum_types::CreateGameErrorType;
+use crate::error_enums::CreateGameErrorType;
 use actix_web::{get, web, Responder};
 use serde::Serialize;
 

@@ -1,4 +1,4 @@
-use crate::enum_types::GameJoinErrorType;
+use crate::error_enums::GameJoinErrorType;
 use crate::AppState;
 use actix_web::{post, web, HttpRequest, Responder};
 use serde::{Deserialize, Serialize};

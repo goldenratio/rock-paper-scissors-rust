@@ -1,4 +1,4 @@
-use crate::enum_types::GameActionErrorType;
+use crate::error_enums::GameActionErrorType;
 use actix_web::{post, web, HttpResponse, Responder};
 use serde::{Deserialize, Serialize};
 

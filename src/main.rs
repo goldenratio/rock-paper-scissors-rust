@@ -1,16 +1,23 @@
+mod admin_handlers;
 mod app_state;
-mod enum_types;
+mod error_enums;
+mod game_creator;
+mod gameplay_manager;
 mod handlers;
 
-use crate::app_state::{AppState, GameCreator, GameplayManager};
+use crate::app_state::AppState;
+use crate::game_creator::GameCreator;
+use crate::gameplay_manager::GameplayManager;
 use crate::handlers::create::create;
 use crate::handlers::game_action::game_action;
 use crate::handlers::game_events::game_events;
 use crate::handlers::join::join;
-use actix_web::{web, App, HttpServer, Responder, get, HttpResponse};
+
+use actix_web::{get, web, App, HttpResponse, HttpServer, Responder};
 use actix_web_static_files::ResourceFiles;
 use std::collections::HashMap;
 use std::sync::Mutex;
+use crate::admin_handlers::shutdown::shutdown;
 
 include!(concat!(env!("OUT_DIR"), "/generated.rs"));
 
@@ -29,9 +36,10 @@ async fn main() -> std::io::Result<()> {
         gameplay_manager: Mutex::new(GameplayManager {
             game_entries: HashMap::new(),
         }),
+        // server_handle: Mutex::new(None),
     });
 
-    HttpServer::new(move || {
+    let server = HttpServer::new(move || {
         let generated = generate();
         App::new()
             .app_data(app_data.clone())
@@ -40,12 +48,21 @@ async fn main() -> std::io::Result<()> {
                     .service(create)
                     .service(join)
                     .service(game_action)
-                    .service(game_events),
+                    .service(game_events)
             )
             .service(ResourceFiles::new("/admin", generated))
+            .service(
+                web::scope("/admin-api")
+                    .service(shutdown)
+            )
             .service(index)
     })
     .bind(("127.0.0.1", 8080))?
-    .run()
-    .await
+    .run();
+
+    // register the server handle with the stop handle
+    // app_data.register_server(server.handle());
+
+    // run server until stopped (either by ctrl-c or stop endpoint)
+    server.await
 }

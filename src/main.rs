@@ -1,25 +1,29 @@
 mod admin_handlers;
-mod app_state;
 mod error_enums;
 mod game_creator;
 mod gameplay_manager;
 mod handlers;
 
-use crate::app_state::AppState;
 use crate::game_creator::GameCreator;
 use crate::gameplay_manager::GameplayManager;
 use crate::handlers::create::create;
 use crate::handlers::game_action::game_action;
 use crate::handlers::game_events::game_events;
 use crate::handlers::join::join;
+use crate::admin_handlers::shutdown::shutdown;
 
 use actix_web::{get, web, App, HttpResponse, HttpServer, Responder};
 use actix_web_static_files::ResourceFiles;
 use std::collections::HashMap;
 use std::sync::Mutex;
-use crate::admin_handlers::shutdown::shutdown;
 
 include!(concat!(env!("OUT_DIR"), "/generated.rs"));
+
+#[derive(Debug)]
+pub struct AppState {
+    pub game_creator: Mutex<GameCreator>,
+    pub gameplay_manager: Mutex<GameplayManager>,
+}
 
 #[get("/")]
 async fn index() -> impl Responder {

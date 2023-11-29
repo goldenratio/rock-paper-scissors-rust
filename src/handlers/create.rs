@@ -1,7 +1,7 @@
 use crate::error_enums::CreateGameError;
+use crate::AppState;
 use actix_web::{get, web, Responder};
 use serde::Serialize;
-use crate::AppState;
 
 #[derive(Serialize, Debug)]
 enum CreateGameResponseData {

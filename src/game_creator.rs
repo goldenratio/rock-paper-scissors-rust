@@ -15,7 +15,8 @@ impl GameCreator {
 
     pub fn create_new_player_token(&mut self) -> Result<String, ParseError> {
         self.player_token_id += 1;
-        let res = format!("player_token_{}", self.player_token_id);
+        // todo: hash the token
+        let res = format!("player_{}_token_{}", self.game_id, self.player_token_id);
         Ok(res)
     }
 }

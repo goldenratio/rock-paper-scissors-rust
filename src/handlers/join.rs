@@ -1,6 +1,6 @@
 use crate::error_enums::GameJoinError;
 use crate::AppState;
-use actix_web::{post, web, HttpRequest, Responder};
+use actix_web::{post, web, Responder};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Deserialize)]
@@ -28,7 +28,6 @@ enum GameJoinResponseData {
 #[post("/join")]
 async fn join(
     param_obj: web::Json<GameJoinRequestData>,
-    _req: HttpRequest,
     state: web::Data<AppState>,
 ) -> impl Responder {
     let payload = param_obj.into_inner();

@@ -1,11 +1,15 @@
-use crate::error_enums::{CreateGameError, GameJoinError};
+use crate::error_enums::{CreateGameError, GameActionError, GameJoinError};
+use serde::Deserialize;
 use std::collections::HashMap;
+use std::str::FromStr;
 
 #[derive(Debug)]
 pub struct PlayerInfo {
     pub display_name: String,
     pub player_token: String,
-    pub actions: Vec<PlayerAction>,
+    pub history: Vec<PlayerAction>,
+    pub current_action: Option<PlayerAction>,
+    pub is_current_turn: bool,
 }
 
 #[derive(Debug)]
@@ -14,11 +18,37 @@ pub struct GameEntry {
     pub player_2: PlayerInfo,
 }
 
-#[derive(Debug)]
+impl GameEntry {
+    pub fn both_players_joined(&self) -> bool {
+        !self.player_1.player_token.is_empty() && !self.player_2.player_token.is_empty()
+    }
+
+    pub fn get_mut_opponent_player(&mut self, player_token: String) -> &mut PlayerInfo {
+        if self.player_1.player_token == player_token {
+            return &mut self.player_1;
+        }
+        return &mut self.player_2;
+    }
+}
+
+#[derive(Clone, Debug, Deserialize)]
 pub enum PlayerAction {
     Rock,
     Paper,
     Scissors,
+}
+
+impl FromStr for PlayerAction {
+    type Err = ();
+
+    fn from_str(input: &str) -> Result<Self, Self::Err> {
+        match input {
+            "rock" => Ok(PlayerAction::Rock),
+            "paper" => Ok(PlayerAction::Paper),
+            "scissors" => Ok(PlayerAction::Scissors),
+            _ => Err(()),
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -37,12 +67,16 @@ impl GameplayManager {
             player_1: PlayerInfo {
                 display_name: "".to_string(),
                 player_token: "".to_string(),
-                actions: vec![],
+                history: vec![],
+                current_action: None,
+                is_current_turn: false,
             },
             player_2: PlayerInfo {
                 display_name: "".to_string(),
                 player_token: "".to_string(),
-                actions: vec![],
+                history: vec![],
+                current_action: None,
+                is_current_turn: false,
             },
         };
         self.game_entries.insert(key, game_entry);
@@ -71,16 +105,44 @@ impl GameplayManager {
         };
 
         println!("game entries {:?}", self.game_entries);
-        Ok(())
+        let game_entry = self.game_entries.get_mut(game_id);
+        let both_players_joined = match &game_entry {
+            Some(game_entry) => game_entry.both_players_joined(),
+            None => false,
+        };
+
+        if both_players_joined {
+            println!("game is ready to play, both players joined!");
+            game_entry.unwrap().player_1.is_current_turn = true;
+        }
+        return Ok(());
     }
 
     pub fn perform_player_action(
         &mut self,
         game_id: &String,
         player_token: &String,
-        player_action: PlayerAction,
-    ) {
-        //
+        player_action: &PlayerAction,
+    ) -> Result<(), GameActionError> {
+        println!("perform player action {:?}", player_action);
+        let player_info_option = self.get_mut_player_info(game_id, player_token);
+
+        if let Some(player_info) = player_info_option {
+            if player_info.is_current_turn {
+                player_info.current_action = Option::from(player_action.clone());
+                player_info.is_current_turn = false;
+
+                let game_entry = self.game_entries.get_mut(game_id).unwrap();
+                game_entry
+                    .get_mut_opponent_player(player_token.clone())
+                    .is_current_turn = true;
+
+                return Ok(());
+            } else {
+                return Err(GameActionError::NotYourTurn);
+            }
+        }
+        return Err(GameActionError::InvalidGameId);
     }
 
     fn get_mut_player_info(

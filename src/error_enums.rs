@@ -9,6 +9,7 @@ pub enum CreateGameError {
 #[derive(Serialize)]
 pub enum GameActionError {
     InvalidGameId,
+    InvalidAction,
     NotYourTurn,
     GenericError,
 }
@@ -18,4 +19,19 @@ pub enum GameJoinError {
     InvalidGameId,
     GameRoomFull,
     GenericError,
+}
+
+#[derive(Serialize)]
+pub enum AppError {
+    BadClientData,
+    GenericError,
+}
+
+#[derive(Serialize)]
+pub enum AppErrorData {
+    #[serde(rename = "data")]
+    Error {
+        #[serde(rename = "error")]
+        error_type: AppError,
+    },
 }

@@ -37,7 +37,7 @@ async fn game_action(
     let player_action_param = PlayerAction::from_str(payload.action_type.as_str());
     if player_action_param.is_err() {
         let error_data = GameActionResponseData::Error {
-            error_type: GameActionError::InvalidAction
+            error_type: GameActionError::InvalidAction,
         };
         return web::Json(error_data);
     }

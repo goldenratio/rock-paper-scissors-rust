@@ -19,15 +19,108 @@ pub struct GameEntry {
 }
 
 impl GameEntry {
-    pub fn both_players_joined(&self) -> bool {
+    pub fn join_game(
+        &mut self,
+        player_token: &String,
+        player_display_name: &String,
+    ) -> Result<(), GameJoinError> {
+        match self.get_mut_player_slot_to_join(player_token) {
+            Some(player_slot) => {
+                player_slot.player_token = player_token.to_string();
+                player_slot.display_name = player_display_name.to_string();
+            }
+            None => {
+                println!("no free player slot found! {:?}", player_display_name);
+                return Err(GameJoinError::GameRoomFull);
+            }
+        };
+
+        if self.both_players_joined() {
+            println!("game is ready to play, both players joined!");
+            self.player_1.is_current_turn = true;
+        }
+        return Ok(());
+    }
+
+    pub fn perform_player_action(&mut self, player_token: &String, player_action: &PlayerAction) -> Result<(), GameActionError> {
+        let player_info_option = self.get_mut_player_info(player_token);
+
+        if let Some(player_info) = player_info_option {
+            return if player_info.is_current_turn {
+                player_info.current_action = Option::from(player_action.clone());
+                player_info.is_current_turn = false;
+
+                if self.both_players_made_current_action() {
+                    let player1_action = self.player_1.current_action.as_mut().unwrap().clone();
+                    self.player_1.history.push(player1_action);
+
+                    let player2_action = self.player_2.current_action.as_mut().unwrap().clone();
+                    self.player_2.history.push(player2_action);
+
+                    // reset action
+                    self.player_1.current_action = None;
+                    self.player_1.is_current_turn = false;
+                    self.player_2.current_action = None;
+                    self.player_2.is_current_turn = false;
+                } else {
+                    self
+                        .get_mut_opponent_player(player_token.clone()).unwrap()
+                        .is_current_turn = true;
+                }
+
+                Ok(())
+            } else {
+                Err(GameActionError::NotYourTurn)
+            }
+        }
+        return Err(GameActionError::GenericError);
+    }
+
+    fn get_mut_player_info(&mut self, player_token: &String) -> Option<&mut PlayerInfo> {
+        if self.player_1.player_token == player_token.to_string() {
+            return Some(&mut self.player_1);
+        }
+        if self.player_2.player_token == player_token.to_string() {
+            return Some(&mut self.player_2);
+        }
+        return None;
+    }
+
+    fn both_players_made_current_action(&self) -> bool {
+        self.player_1.current_action.is_some() && self.player_2.current_action.is_some()
+    }
+
+    fn both_players_joined(&self) -> bool {
         !self.player_1.player_token.is_empty() && !self.player_2.player_token.is_empty()
     }
 
-    pub fn get_mut_opponent_player(&mut self, player_token: String) -> &mut PlayerInfo {
+    fn get_mut_opponent_player(&mut self, player_token: String) -> Option<&mut PlayerInfo> {
         if self.player_1.player_token == player_token {
-            return &mut self.player_1;
+            return Some(&mut self.player_2);
         }
-        return &mut self.player_2;
+
+        if self.player_2.player_token == player_token {
+            return Some(&mut self.player_1);
+        }
+        return None;
+    }
+
+    fn get_mut_player_slot_to_join(
+        &mut self,
+        player_token: &String,
+    ) -> Option<&mut PlayerInfo> {
+        if self.player_1.player_token.is_empty()
+            || self.player_1.player_token == player_token.to_string()
+        {
+            return Some(&mut self.player_1);
+        }
+        if self.player_2.player_token.is_empty()
+            || self.player_2.player_token == player_token.to_string()
+        {
+            return Some(&mut self.player_2);
+        }
+
+        return None;
     }
 }
 
@@ -80,7 +173,7 @@ impl GameplayManager {
             },
         };
         self.game_entries.insert(key, game_entry);
-        Ok(())
+        return Ok(());
     }
 
     pub fn join_game(
@@ -89,33 +182,12 @@ impl GameplayManager {
         player_token: &String,
         player_display_name: &String,
     ) -> Result<(), GameJoinError> {
-        if !self.game_entries.contains_key(game_id) {
-            return Err(GameJoinError::InvalidGameId);
-        }
-
-        match self.get_mut_player_slot_to_join(game_id, player_token) {
-            Some(player_slot) => {
-                player_slot.player_token = player_token.to_string();
-                player_slot.display_name = player_display_name.to_string();
-            }
-            None => {
-                println!("no free player slot found! {:?}", player_display_name);
-                return Err(GameJoinError::GameRoomFull);
-            }
-        };
-
-        println!("game entries {:?}", self.game_entries);
         let game_entry = self.game_entries.get_mut(game_id);
-        let both_players_joined = match &game_entry {
-            Some(game_entry) => game_entry.both_players_joined(),
-            None => false,
-        };
-
-        if both_players_joined {
-            println!("game is ready to play, both players joined!");
-            game_entry.unwrap().player_1.is_current_turn = true;
+        if let Some(val) = game_entry {
+            return val.join_game(player_token, player_display_name);
         }
-        return Ok(());
+
+        return Err(GameJoinError::InvalidGameId);
     }
 
     pub fn perform_player_action(
@@ -124,66 +196,13 @@ impl GameplayManager {
         player_token: &String,
         player_action: &PlayerAction,
     ) -> Result<(), GameActionError> {
-        println!("perform player action {:?}", player_action);
-        let player_info_option = self.get_mut_player_info(game_id, player_token);
-
-        if let Some(player_info) = player_info_option {
-            if player_info.is_current_turn {
-                player_info.current_action = Option::from(player_action.clone());
-                player_info.is_current_turn = false;
-
-                let game_entry = self.game_entries.get_mut(game_id).unwrap();
-                game_entry
-                    .get_mut_opponent_player(player_token.clone())
-                    .is_current_turn = true;
-
-                return Ok(());
-            } else {
-                return Err(GameActionError::NotYourTurn);
-            }
+        let game_entry = self.game_entries.get_mut(game_id);
+        if let Some(val) = game_entry {
+            let res = val.perform_player_action(player_token, player_action);
+            println!("game_entries {:?}", self.game_entries);
+            return res;
         }
+
         return Err(GameActionError::InvalidGameId);
-    }
-
-    fn get_mut_player_info(
-        &mut self,
-        game_id: &String,
-        player_token: &String,
-    ) -> Option<&mut PlayerInfo> {
-        match self.game_entries.get_mut(game_id) {
-            Some(game_entry) => {
-                if game_entry.player_1.player_token == player_token.to_string() {
-                    return Some(&mut game_entry.player_1);
-                }
-                if game_entry.player_2.player_token == player_token.to_string() {
-                    return Some(&mut game_entry.player_2);
-                }
-            }
-            _ => {}
-        };
-        None
-    }
-
-    fn get_mut_player_slot_to_join(
-        &mut self,
-        game_id: &String,
-        player_token: &String,
-    ) -> Option<&mut PlayerInfo> {
-        match self.game_entries.get_mut(game_id) {
-            Some(game_entry) => {
-                if game_entry.player_1.player_token.is_empty()
-                    || game_entry.player_1.player_token == player_token.to_string()
-                {
-                    return Some(&mut game_entry.player_1);
-                }
-                if game_entry.player_2.player_token.is_empty()
-                    || game_entry.player_2.player_token == player_token.to_string()
-                {
-                    return Some(&mut game_entry.player_2);
-                }
-            }
-            _ => {}
-        };
-        None
     }
 }

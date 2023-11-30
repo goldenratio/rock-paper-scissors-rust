@@ -10,7 +10,7 @@ pub enum CreateGameError {
 pub enum GameActionError {
     InvalidGameId,
     InvalidAction,
-    NotYourTurn,
+    ActionAlreadyPerformed,
     GenericError,
 }
 

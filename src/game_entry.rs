@@ -50,6 +50,10 @@ impl GameEntry {
         let player_info_option = self.get_mut_player_info(player_token);
 
         if let Some(player_info) = player_info_option {
+            if player_info.current_action.is_some() {
+                return Err(GameActionError::ActionAlreadyPerformed);
+            }
+
             player_info.current_action = Option::from(player_action.clone());
 
             if self.both_players_made_current_action() {

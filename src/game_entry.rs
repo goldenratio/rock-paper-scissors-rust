@@ -7,8 +7,7 @@ pub struct PlayerInfo {
     pub display_name: String,
     pub player_token: String,
     pub history: Vec<PlayerAction>,
-    pub current_action: Option<PlayerAction>,
-    pub is_current_turn: bool,
+    pub current_action: Option<PlayerAction>
 }
 
 #[derive(Debug)]
@@ -43,7 +42,6 @@ impl GameEntry {
 
         if self.both_players_joined() {
             println!("game is ready to play, both players joined!");
-            self.player_1.is_current_turn = true;
         }
         return Ok(());
     }
@@ -52,36 +50,23 @@ impl GameEntry {
         let player_info_option = self.get_mut_player_info(player_token);
 
         if let Some(player_info) = player_info_option {
-            return if player_info.is_current_turn {
-                player_info.current_action = Option::from(player_action.clone());
-                player_info.is_current_turn = false;
+            player_info.current_action = Option::from(player_action.clone());
 
-                if self.both_players_made_current_action() {
-                    let player1_action = self.player_1.current_action.as_mut().unwrap().clone();
-                    self.player_1.history.push(player1_action);
+            if self.both_players_made_current_action() {
+                let player1_action = self.player_1.current_action.as_mut().unwrap().clone();
+                self.player_1.history.push(player1_action);
 
-                    let player2_action = self.player_2.current_action.as_mut().unwrap().clone();
-                    self.player_2.history.push(player2_action);
+                let player2_action = self.player_2.current_action.as_mut().unwrap().clone();
+                self.player_2.history.push(player2_action);
 
-                    // println!("player_1 {:?} player_2 {:?}", player1_action, player2_action);
+                // println!("player_1 {:?} player_2 {:?}", player1_action, player2_action);
 
-                    // reset action
-                    self.player_1.current_action = None;
-                    self.player_1.is_current_turn = true;
-
-                    self.player_2.current_action = None;
-                    self.player_2.is_current_turn = false;
-                } else {
-                    self
-                        .get_mut_opponent_player(player_token.clone())
-                        .unwrap()
-                        .is_current_turn = true;
-                }
-
-                Ok(())
-            } else {
-                Err(GameActionError::NotYourTurn)
+                // reset action
+                self.player_1.current_action = None;
+                self.player_2.current_action = None;
             }
+
+            return Ok(());
         }
         return Err(GameActionError::GenericError);
     }

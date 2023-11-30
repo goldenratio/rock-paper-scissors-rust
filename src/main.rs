@@ -66,6 +66,8 @@ async fn main() -> std::io::Result<()> {
         }),
     });
 
+    let server_port = settings.get("server_port").unwrap().parse::<u16>().unwrap();
+
     let server = HttpServer::new(move || {
         let static_admin_client_files = generate();
         let cors = Cors::default()
@@ -93,7 +95,7 @@ async fn main() -> std::io::Result<()> {
             .service(web::scope("/admin-api").service(gameplay_info))
             .service(index)
     })
-    .bind(("127.0.0.1", 8080))?
+    .bind(("127.0.0.1", server_port))?
     .run();
 
     // run server until stopped (either by ctrl-c or stop endpoint)

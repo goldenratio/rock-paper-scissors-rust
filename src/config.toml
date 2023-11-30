@@ -1,3 +1,5 @@
 admin_client_route = "/admin"
 admin_username = "admin"
 admin_password = "Password1"
+
+server_port=8090

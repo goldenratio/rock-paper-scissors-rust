@@ -46,7 +46,7 @@ impl GameplayManager {
         let game_entry = self.game_entries.get_mut(game_id);
         if let Some(val) = game_entry {
             let res = val.perform_player_action(player_token, player_action);
-            println!("game_entries {:?}", self.game_entries);
+            // println!("game_entries {:?}", self.game_entries);
             return res;
         }
 

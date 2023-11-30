@@ -21,11 +21,6 @@ pub enum GameJoinError {
     GenericError,
 }
 
-#[derive(Debug, Serialize)]
-pub enum GameplayInfoError {
-    GenericError,
-}
-
 #[derive(Serialize)]
 pub enum AppError {
     BadClientData,

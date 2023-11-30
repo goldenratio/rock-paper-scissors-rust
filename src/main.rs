@@ -23,6 +23,7 @@ use actix_web_static_files::ResourceFiles;
 use config::Config;
 use std::collections::HashMap;
 use std::sync::Mutex;
+use actix_cors::Cors;
 use actix_web::middleware::Logger;
 
 include!(concat!(env!("OUT_DIR"), "/generated.rs"));
@@ -38,8 +39,8 @@ async fn index() -> impl Responder {
     HttpResponse::Ok().body("Online")
 }
 
-fn generic_app_error(err: JsonPayloadError, _req: &HttpRequest) -> Error {
-    println!("{:?}", err);
+fn generic_app_error(err: JsonPayloadError, req: &HttpRequest) -> Error {
+    println!("generic JSON error {:?}, {:?}", err, req);
     let post_error = AppErrorData::Error {
         error_type: AppError::BadClientData,
     };
@@ -67,8 +68,15 @@ async fn main() -> std::io::Result<()> {
 
     let server = HttpServer::new(move || {
         let static_admin_client_files = generate();
+        let cors = Cors::default()
+            .allow_any_origin()
+            .allow_any_header()
+            .allow_any_method()
+            .send_wildcard();
+
         App::new()
             .wrap(Logger::default())
+            .wrap(cors)
             .app_data(app_data.clone())
             .app_data(web::JsonConfig::default().error_handler(generic_app_error))
             .service(

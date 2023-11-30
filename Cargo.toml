@@ -13,6 +13,7 @@ opt-level = 3
 strip = true
 
 [dependencies]
+actix-cors = "0.6.4"
 actix-web = "4"
 actix-web-static-files = "4.0.1"
 config = "0.13.4"

@@ -6,7 +6,7 @@ mod handlers;
 mod game_entry;
 mod player_action;
 
-use crate::admin_handlers::shutdown::shutdown;
+use crate::admin_handlers::gameplay_info::{gameplay_info};
 use crate::game_creator::GameCreator;
 use crate::gameplay_manager::GameplayManager;
 use crate::handlers::create::create;
@@ -82,7 +82,7 @@ async fn main() -> std::io::Result<()> {
                 settings.get("admin_client_route").unwrap(),
                 static_admin_client_files,
             ))
-            .service(web::scope("/admin-api").service(shutdown))
+            .service(web::scope("/admin-api").service(gameplay_info))
             .service(index)
     })
     .bind(("127.0.0.1", 8080))?

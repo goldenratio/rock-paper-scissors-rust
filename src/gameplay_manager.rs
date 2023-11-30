@@ -52,4 +52,8 @@ impl GameplayManager {
 
         return Err(GameActionError::InvalidGameId);
     }
+
+    pub fn gameplay_data(&self) -> HashMap<String, GameEntry> {
+        return self.game_entries.clone();
+    }
 }

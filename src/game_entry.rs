@@ -1,7 +1,8 @@
+use serde::Serialize;
 use crate::error_enums::{GameActionError, GameJoinError};
 use crate::player_action::PlayerAction;
 
-#[derive(Debug, Default)]
+#[derive(Debug, Clone, Default, Serialize)]
 pub struct PlayerInfo {
     pub display_name: String,
     pub player_token: String,
@@ -17,7 +18,7 @@ pub enum GameResult {
     Draw,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Serialize)]
 pub struct GameEntry {
     pub player_1: PlayerInfo,
     pub player_2: PlayerInfo,

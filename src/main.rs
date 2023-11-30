@@ -3,6 +3,8 @@ mod error_enums;
 mod game_creator;
 mod gameplay_manager;
 mod handlers;
+mod game_entry;
+mod player_action;
 
 use crate::admin_handlers::shutdown::shutdown;
 use crate::game_creator::GameCreator;
@@ -21,6 +23,7 @@ use actix_web_static_files::ResourceFiles;
 use config::Config;
 use std::collections::HashMap;
 use std::sync::Mutex;
+use actix_web::middleware::Logger;
 
 include!(concat!(env!("OUT_DIR"), "/generated.rs"));
 
@@ -65,6 +68,7 @@ async fn main() -> std::io::Result<()> {
     let server = HttpServer::new(move || {
         let static_admin_client_files = generate();
         App::new()
+            .wrap(Logger::default())
             .app_data(app_data.clone())
             .app_data(web::JsonConfig::default().error_handler(generic_app_error))
             .service(

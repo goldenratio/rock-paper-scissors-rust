@@ -9,6 +9,7 @@ pub struct GameCreator {
 impl GameCreator {
     pub fn create_new_game(&mut self) -> Result<String, ParseError> {
         self.game_id += 1;
+        // todo: hash the gameId
         let res = format!("game{}", self.game_id);
         Ok(res)
     }

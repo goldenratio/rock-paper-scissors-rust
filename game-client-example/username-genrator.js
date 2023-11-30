@@ -1,21 +1,4 @@
 /**
- * Generates random usernames.
- *
- * @param {number} count - The number of usernames to generate.
- * @returns {string[]} An array of randomly generated usernames.
- */
-export function generateUsernames(count) {
-  const usernames = [];
-
-  for (let i = 0; i < count; i++) {
-    const username = generateUsername();
-    usernames.push(username);
-  }
-
-  return usernames;
-}
-
-/**
  * Generates a random username.
  *
  * @returns {string} A randomly generated username.

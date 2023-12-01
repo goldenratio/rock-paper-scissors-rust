@@ -1,13 +1,13 @@
-use serde::Serialize;
 use crate::error_enums::{GameActionError, GameJoinError};
 use crate::player_action::PlayerAction;
+use serde::Serialize;
 
 #[derive(Debug, Clone, Default, Serialize)]
 pub struct PlayerInfo {
     pub display_name: String,
     pub player_token: String,
     pub history: Vec<PlayerAction>,
-    pub current_action: Option<PlayerAction>
+    pub current_action: Option<PlayerAction>,
 }
 
 #[derive(Debug)]
@@ -46,7 +46,11 @@ impl GameEntry {
         return Ok(());
     }
 
-    pub fn perform_player_action(&mut self, player_token: &String, player_action: &PlayerAction) -> Result<(), GameActionError> {
+    pub fn perform_player_action(
+        &mut self,
+        player_token: &String,
+        player_action: &PlayerAction,
+    ) -> Result<(), GameActionError> {
         let player_info_option = self.get_mut_player_info(player_token);
 
         if let Some(player_info) = player_info_option {
@@ -93,21 +97,7 @@ impl GameEntry {
         !self.player_1.player_token.is_empty() && !self.player_2.player_token.is_empty()
     }
 
-    fn get_mut_opponent_player(&mut self, player_token: String) -> Option<&mut PlayerInfo> {
-        if self.player_1.player_token == player_token {
-            return Some(&mut self.player_2);
-        }
-
-        if self.player_2.player_token == player_token {
-            return Some(&mut self.player_1);
-        }
-        return None;
-    }
-
-    fn get_mut_player_slot_to_join(
-        &mut self,
-        player_token: &String,
-    ) -> Option<&mut PlayerInfo> {
+    fn get_mut_player_slot_to_join(&mut self, player_token: &String) -> Option<&mut PlayerInfo> {
         if self.player_1.player_token.is_empty()
             || self.player_1.player_token == player_token.to_string()
         {

@@ -1,8 +1,8 @@
-use std::collections::HashMap;
+use crate::game_entry::GameEntry;
 use crate::AppState;
 use actix_web::{get, web, Responder};
 use serde::Serialize;
-use crate::game_entry::GameEntry;
+use std::collections::HashMap;
 
 #[derive(Serialize, Debug)]
 struct GameplayInfoResponseData {
@@ -15,7 +15,7 @@ async fn gameplay_info(state: web::Data<AppState>) -> impl Responder {
     println!("/gameplay_info");
     let gameplay_manager = state.gameplay_manager.lock().unwrap();
     let response_data = GameplayInfoResponseData {
-        data: gameplay_manager.gameplay_data()
+        data: gameplay_manager.gameplay_data(),
     };
     return web::Json(response_data);
 }

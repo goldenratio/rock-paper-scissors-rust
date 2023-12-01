@@ -1,12 +1,12 @@
 mod admin_handlers;
 mod error_enums;
 mod game_creator;
+mod game_entry;
 mod gameplay_manager;
 mod handlers;
-mod game_entry;
 mod player_action;
 
-use crate::admin_handlers::gameplay_info::{gameplay_info};
+use crate::admin_handlers::gameplay_info::gameplay_info;
 use crate::game_creator::GameCreator;
 use crate::gameplay_manager::GameplayManager;
 use crate::handlers::create::create;
@@ -15,7 +15,9 @@ use crate::handlers::game_events::game_events;
 use crate::handlers::join::join;
 
 use crate::error_enums::{AppError, AppErrorData};
+use actix_cors::Cors;
 use actix_web::error::{InternalError, JsonPayloadError};
+use actix_web::middleware::Logger;
 use actix_web::{
     get, web, App, Error, HttpRequest, HttpResponse, HttpServer, Responder, ResponseError,
 };
@@ -23,8 +25,6 @@ use actix_web_static_files::ResourceFiles;
 use config::Config;
 use std::collections::HashMap;
 use std::sync::Mutex;
-use actix_cors::Cors;
-use actix_web::middleware::Logger;
 
 include!(concat!(env!("OUT_DIR"), "/generated.rs"));
 

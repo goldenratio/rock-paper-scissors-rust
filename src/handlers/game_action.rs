@@ -1,6 +1,6 @@
 use crate::error_enums::GameActionError;
-use crate::AppState;
 use crate::player_action::PlayerAction;
+use crate::AppState;
 use actix_web::{post, web, Responder};
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;

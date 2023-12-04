@@ -46,7 +46,7 @@ pub struct AppState {
 
 #[get("/")]
 async fn index() -> impl Responder {
-    HttpResponse::Ok().body("Online")
+    return HttpResponse::Ok().body("Online");
 }
 
 fn generic_json_error(err: JsonPayloadError, req: &HttpRequest) -> Error {
@@ -54,7 +54,7 @@ fn generic_json_error(err: JsonPayloadError, req: &HttpRequest) -> Error {
     let post_error = AppErrorData::Error {
         error_type: AppError::BadClientData,
     };
-    InternalError::from_response(err, HttpResponse::BadRequest().json(post_error)).into()
+    return InternalError::from_response(err, HttpResponse::BadRequest().json(post_error)).into();
 }
 
 #[actix_web::main]

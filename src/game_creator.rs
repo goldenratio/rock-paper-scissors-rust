@@ -11,13 +11,13 @@ impl GameCreator {
         self.game_id += 1;
         // todo: hash the gameId
         let res = format!("game{}", self.game_id);
-        Ok(res)
+        return Ok(res);
     }
 
     pub fn create_new_player_token(&mut self) -> Result<String, ParseError> {
         self.player_token_id += 1;
         // todo: hash the token
         let res = format!("player_{}_token_{}", self.game_id, self.player_token_id);
-        Ok(res)
+        return Ok(res);
     }
 }

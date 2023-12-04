@@ -3,16 +3,28 @@ use actix_web::dev::Payload;
 use actix_web::error::ErrorUnauthorized;
 use actix_web::http::header::HeaderValue;
 use actix_web::{web, Error as ActixWebError, FromRequest, HttpRequest};
+use chrono::{Duration, Utc};
 use jsonwebtoken::{
     decode, errors::Error as JwtError, Algorithm, DecodingKey, TokenData, Validation,
 };
 use serde::{Deserialize, Serialize};
 use std::future::{ready, Ready};
 
-#[derive(Serialize, Deserialize)]
+const JWT_EXPIRATION_MINUTES: i64 = 18;
+
+#[derive(Serialize, Deserialize, Debug)]
 pub struct AdminClaims {
-    pub id: usize,
     pub exp: usize,
+}
+
+impl AdminClaims {
+    pub fn new() -> Self {
+        let token_expiry_date =
+            (Utc::now() + Duration::minutes(JWT_EXPIRATION_MINUTES)).timestamp() as usize;
+        Self {
+            exp: token_expiry_date,
+        }
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -52,12 +64,9 @@ impl FromRequest for AdminAuthentication {
             &Validation::new(Algorithm::HS256),
         );
         match token_result {
-            Ok(token) => {
-                println!("{:}", token.claims.id);
-                ready(Ok(AdminAuthentication {}))
-            }
+            Ok(token) => ready(Ok(AdminAuthentication {})),
             Err(e) => {
-                println!("token_result Error: {:}", e);
+                println!("token_result Error: {:?}", e);
                 ready(Err(ErrorUnauthorized("Invalid authentication token sent!")))
             }
         }

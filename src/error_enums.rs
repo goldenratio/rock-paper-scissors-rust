@@ -38,5 +38,5 @@ pub enum AppErrorData {
 
 #[derive(Serialize)]
 pub enum AdminError {
-    GenericError
+    GenericError,
 }

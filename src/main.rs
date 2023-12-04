@@ -1,11 +1,11 @@
 mod admin_handlers;
 mod error_enums;
+mod extractors;
 mod game_creator;
 mod game_entry;
 mod gameplay_manager;
 mod handlers;
 mod player_action;
-mod extractors;
 
 use crate::admin_handlers::gameplay_info::gameplay_info;
 use crate::game_creator::GameCreator;
@@ -15,6 +15,7 @@ use crate::handlers::game_action::game_action;
 use crate::handlers::game_events::game_events;
 use crate::handlers::join::join;
 
+use crate::admin_handlers::admin_status::admin_status;
 use crate::error_enums::{AppError, AppErrorData};
 use actix_cors::Cors;
 use actix_web::error::{InternalError, JsonPayloadError};
@@ -26,7 +27,6 @@ use actix_web_static_files::ResourceFiles;
 use config::Config;
 use std::collections::HashMap;
 use std::sync::Mutex;
-use crate::admin_handlers::admin_status::admin_status;
 
 include!(concat!(env!("OUT_DIR"), "/generated.rs"));
 
@@ -78,7 +78,7 @@ async fn main() -> std::io::Result<()> {
             admin_jwt_secret: settings.get("admin_jwt_secret").unwrap().to_string(),
             admin_username: settings.get("admin_username").unwrap().to_string(),
             admin_password: settings.get("admin_password").unwrap().to_string(),
-        })
+        }),
     });
 
     let server_port = settings.get("server_port").unwrap().parse::<u16>().unwrap();
@@ -107,9 +107,11 @@ async fn main() -> std::io::Result<()> {
                 settings.get("admin_client_route").unwrap(),
                 static_admin_client_files,
             ))
-            .service(web::scope("/admin-api")
-                .service(admin_status)
-                .service(gameplay_info))
+            .service(
+                web::scope("/admin-api")
+                    .service(admin_status)
+                    .service(gameplay_info),
+            )
             .service(index)
     })
     .bind(("127.0.0.1", server_port))?

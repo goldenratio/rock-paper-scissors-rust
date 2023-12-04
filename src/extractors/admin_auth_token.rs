@@ -1,16 +1,18 @@
-use std::future::{Ready, ready};
-use actix_web::{FromRequest, HttpRequest, Error as ActixWebError, web};
+use crate::AppState;
 use actix_web::dev::Payload;
 use actix_web::error::ErrorUnauthorized;
 use actix_web::http::header::HeaderValue;
-use jsonwebtoken::{TokenData, errors::Error as JwtError, decode, DecodingKey, Validation, Algorithm};
+use actix_web::{web, Error as ActixWebError, FromRequest, HttpRequest};
+use jsonwebtoken::{
+    decode, errors::Error as JwtError, Algorithm, DecodingKey, TokenData, Validation,
+};
 use serde::{Deserialize, Serialize};
-use crate::AppState;
+use std::future::{ready, Ready};
 
 #[derive(Serialize, Deserialize)]
 pub struct AdminClaims {
     pub id: usize,
-    pub exp: usize
+    pub exp: usize,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -25,16 +27,21 @@ impl FromRequest for AdminAuthentication {
         let app_state = &req.app_data::<web::Data<AppState>>().unwrap();
         let admin_info = app_state.admin_info.lock().unwrap();
 
-        let authorization_header_option: Option<&HeaderValue> = req.headers().get(actix_web::http::header::AUTHORIZATION);
+        let authorization_header_option: Option<&HeaderValue> =
+            req.headers().get(actix_web::http::header::AUTHORIZATION);
         // No Header was sent
         if authorization_header_option.is_none() {
             return ready(Err(ErrorUnauthorized("No authentication token sent!")));
         }
 
-        let authentication_token: String = authorization_header_option.unwrap().to_str().unwrap_or("").to_string();
+        let authentication_token: String = authorization_header_option
+            .unwrap()
+            .to_str()
+            .unwrap_or("")
+            .to_string();
         // Couldn't convert Header::Authorization to String
         if authentication_token.is_empty() {
-            return ready(Err(ErrorUnauthorized("Invalid authentication token sent!")))
+            return ready(Err(ErrorUnauthorized("Invalid authentication token sent!")));
         }
         let client_auth_token = authentication_token[6..authentication_token.len()].trim();
         let admin_jwt_secret: &str = admin_info.admin_jwt_secret.as_str();
@@ -48,11 +55,11 @@ impl FromRequest for AdminAuthentication {
             Ok(token) => {
                 println!("{:}", token.claims.id);
                 ready(Ok(AdminAuthentication {}))
-            },
+            }
             Err(e) => {
                 println!("token_result Error: {:}", e);
                 ready(Err(ErrorUnauthorized("Invalid authentication token sent!")))
-            },
+            }
         }
     }
 }

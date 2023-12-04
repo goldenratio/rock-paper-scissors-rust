@@ -114,7 +114,7 @@ async fn main() -> std::io::Result<()> {
             )
             .service(index)
     })
-    .bind(("127.0.0.1", server_port))?
+    .bind(("::", server_port))?
     .run();
 
     // run server until stopped (either by ctrl-c or stop endpoint)

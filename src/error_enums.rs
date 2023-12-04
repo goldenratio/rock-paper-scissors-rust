@@ -35,3 +35,8 @@ pub enum AppErrorData {
         error_type: AppError,
     },
 }
+
+#[derive(Serialize)]
+pub enum AdminError {
+    GenericError
+}

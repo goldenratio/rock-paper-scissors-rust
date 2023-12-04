@@ -1,4 +1,5 @@
 use std::string::ParseError;
+use sha256::digest;
 
 #[derive(Debug)]
 pub struct GameCreator {
@@ -9,15 +10,15 @@ pub struct GameCreator {
 impl GameCreator {
     pub fn create_new_game(&mut self) -> Result<String, ParseError> {
         self.game_id += 1;
-        // todo: hash the gameId
         let res = format!("game{}", self.game_id);
-        return Ok(res);
+        let res_hash = digest(res)[..6].to_string();
+        return Ok(res_hash);
     }
 
     pub fn create_new_player_token(&mut self) -> Result<String, ParseError> {
         self.player_token_id += 1;
-        // todo: hash the token
-        let res = format!("player_{}_token_{}", self.game_id, self.player_token_id);
-        return Ok(res);
+        let res = format!("{}{}", self.game_id, self.player_token_id);
+        let res_hash = digest(res);
+        return Ok(res_hash);
     }
 }

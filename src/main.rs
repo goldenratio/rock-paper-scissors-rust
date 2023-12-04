@@ -26,6 +26,8 @@ use actix_web::{
 use actix_web_static_files::ResourceFiles;
 use config::Config;
 use std::collections::HashMap;
+use std::net::{Ipv4Addr, Ipv6Addr, SocketAddr};
+use std::str::FromStr;
 use std::sync::Mutex;
 
 include!(concat!(env!("OUT_DIR"), "/generated.rs"));
@@ -82,6 +84,15 @@ async fn main() -> std::io::Result<()> {
     });
 
     let server_port = settings.get("server_port").unwrap().parse::<u16>().unwrap();
+    let use_ip_v6 = settings.get("use_server_ip_v6").unwrap().parse::<bool>().unwrap();
+    let ip_addr = if use_ip_v6 {
+        "::".to_string()
+    } else {
+        "127.0.0.1".to_string()
+    };
+
+    let socket_addr = SocketAddr::new(ip_addr.parse().unwrap(), server_port);
+    println!("server is running on, {:?}", socket_addr.to_string());
 
     let server = HttpServer::new(move || {
         let static_admin_client_files = generate();
@@ -114,7 +125,7 @@ async fn main() -> std::io::Result<()> {
             )
             .service(index)
     })
-    .bind(("::", server_port))?
+    .bind(socket_addr)?
     .run();
 
     // run server until stopped (either by ctrl-c or stop endpoint)

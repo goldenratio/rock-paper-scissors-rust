@@ -20,6 +20,7 @@ chrono = "0.4.31"
 config = "0.13.4"
 jsonwebtoken = "9.2.0"
 serde = { version = "1.0", features = ["derive"] }
+sha256 = "1.4.0"
 static-files = "0.2.3"
 
 [build-dependencies]

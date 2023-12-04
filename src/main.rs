@@ -1,4 +1,5 @@
 mod admin_handlers;
+mod app_state;
 mod error_enums;
 mod extractors;
 mod game_creator;
@@ -9,15 +10,15 @@ mod player_action;
 mod server_settings;
 
 use crate::admin_handlers::gameplay_info::gameplay_info;
-use crate::game_creator::GameCreator;
-use crate::gameplay_manager::GameplayManager;
 use crate::handlers::create::create;
 use crate::handlers::game_action::game_action;
 use crate::handlers::game_events::game_events;
 use crate::handlers::join::join;
 
 use crate::admin_handlers::admin_status::admin_status;
+use crate::app_state::AppState;
 use crate::error_enums::{AppError, AppErrorData};
+use crate::server_settings::ServerSettings;
 use actix_cors::Cors;
 use actix_web::error::{InternalError, JsonPayloadError};
 use actix_web::middleware::Logger;
@@ -25,26 +26,9 @@ use actix_web::{
     get, web, App, Error, HttpRequest, HttpResponse, HttpServer, Responder, ResponseError,
 };
 use actix_web_static_files::ResourceFiles;
-use std::collections::HashMap;
 use std::str::FromStr;
-use std::sync::Mutex;
-use crate::server_settings::ServerSettings;
 
 include!(concat!(env!("OUT_DIR"), "/generated.rs"));
-
-#[derive(Debug)]
-pub struct AdminInfo {
-    pub admin_jwt_secret: String,
-    pub admin_username: String,
-    pub admin_password: String,
-}
-
-#[derive(Debug)]
-pub struct AppState {
-    pub game_creator: Mutex<GameCreator>,
-    pub gameplay_manager: Mutex<GameplayManager>,
-    pub admin_info: Mutex<AdminInfo>,
-}
 
 #[get("/")]
 async fn index() -> impl Responder {
@@ -62,21 +46,7 @@ fn generic_json_error(err: JsonPayloadError, req: &HttpRequest) -> Error {
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     let settings = ServerSettings::default();
-
-    let app_data = web::Data::new(AppState {
-        game_creator: Mutex::new(GameCreator {
-            game_id: 0,
-            player_token_id: 0,
-        }),
-        gameplay_manager: Mutex::new(GameplayManager {
-            game_entries: HashMap::new(),
-        }),
-        admin_info: Mutex::new(AdminInfo {
-            admin_jwt_secret: settings.admin_jwt_secret.clone(),
-            admin_username: settings.admin_username.clone(),
-            admin_password: settings.admin_password.clone(),
-        }),
-    });
+    let app_data = web::Data::new(AppState::new(&settings));
 
     let socket_addr = settings.get_socket_addr();
     println!("server is running on, {:?}", socket_addr.to_string());

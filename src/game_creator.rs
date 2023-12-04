@@ -1,5 +1,5 @@
-use std::string::ParseError;
 use sha256::digest;
+use std::string::ParseError;
 
 #[derive(Debug)]
 pub struct GameCreator {

@@ -1,6 +1,6 @@
+use crate::app_state::{AdminInfo, AppState};
 use crate::error_enums::AdminError;
 use crate::extractors::admin_auth_token::AdminClaims;
-use crate::{AdminInfo, AppState};
 use actix_web::{post, web, Responder};
 use jsonwebtoken::{encode, EncodingKey, Header};
 use serde::{Deserialize, Serialize};

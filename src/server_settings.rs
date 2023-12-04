@@ -1,6 +1,6 @@
+use config::Config;
 use std::collections::HashMap;
 use std::net::SocketAddr;
-use config::Config;
 
 pub struct ServerSettings {
     pub admin_client_route: String,
@@ -30,7 +30,11 @@ impl Default for ServerSettings {
             admin_password: settings.get("admin_password").unwrap().to_string(),
             admin_jwt_secret: settings.get("admin_jwt_secret").unwrap().to_string(),
             server_port: settings.get("server_port").unwrap().parse::<u16>().unwrap(),
-            use_server_ip_v6: settings.get("use_server_ip_v6").unwrap().parse::<bool>().unwrap(),
+            use_server_ip_v6: settings
+                .get("use_server_ip_v6")
+                .unwrap()
+                .parse::<bool>()
+                .unwrap(),
         }
     }
 }

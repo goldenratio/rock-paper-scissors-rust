@@ -29,10 +29,10 @@ impl GameEntry {
         player_token: &String,
         player_display_name: &String,
     ) -> Result<(), GameJoinError> {
-        match self.get_mut_player_slot_to_join(player_token) {
-            Some(player_slot) => {
-                player_slot.player_token = player_token.to_string();
-                player_slot.display_name = player_display_name.to_string();
+        match self.get_player_info_to_join_mut(player_token) {
+            Some(player_info) => {
+                player_info.player_token = player_token.to_string();
+                player_info.display_name = player_display_name.to_string();
             }
             None => {
                 println!("no free player slot found! {:?}", player_display_name);
@@ -51,7 +51,7 @@ impl GameEntry {
         player_token: &String,
         player_action: &PlayerAction,
     ) -> Result<(), GameActionError> {
-        let player_info_option = self.get_mut_player_info(player_token);
+        let player_info_option = self.get_player_info_mut(player_token);
 
         if let Some(player_info) = player_info_option {
             if player_info.current_action.is_some() {
@@ -79,7 +79,15 @@ impl GameEntry {
         return Err(GameActionError::GenericError);
     }
 
-    fn get_mut_player_info(&mut self, player_token: &String) -> Option<&mut PlayerInfo> {
+    fn both_players_made_current_action(&self) -> bool {
+        return self.player_1.current_action.is_some() && self.player_2.current_action.is_some();
+    }
+
+    fn both_players_joined(&self) -> bool {
+        return !self.player_1.player_token.is_empty() && !self.player_2.player_token.is_empty();
+    }
+
+    fn get_player_info_mut(&mut self, player_token: &String) -> Option<&mut PlayerInfo> {
         if self.player_1.player_token == player_token.to_string() {
             return Some(&mut self.player_1);
         }
@@ -89,15 +97,7 @@ impl GameEntry {
         return None;
     }
 
-    fn both_players_made_current_action(&self) -> bool {
-        self.player_1.current_action.is_some() && self.player_2.current_action.is_some()
-    }
-
-    fn both_players_joined(&self) -> bool {
-        !self.player_1.player_token.is_empty() && !self.player_2.player_token.is_empty()
-    }
-
-    fn get_mut_player_slot_to_join(&mut self, player_token: &String) -> Option<&mut PlayerInfo> {
+    fn get_player_info_to_join_mut(&mut self, player_token: &String) -> Option<&mut PlayerInfo> {
         if self.player_1.player_token.is_empty()
             || self.player_1.player_token == player_token.to_string()
         {

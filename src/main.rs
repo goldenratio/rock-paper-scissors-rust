@@ -49,7 +49,7 @@ async fn index() -> impl Responder {
     HttpResponse::Ok().body("Online")
 }
 
-fn generic_app_error(err: JsonPayloadError, req: &HttpRequest) -> Error {
+fn generic_json_error(err: JsonPayloadError, req: &HttpRequest) -> Error {
     println!("generic JSON error {:?}, {:?}", err, req);
     let post_error = AppErrorData::Error {
         error_type: AppError::BadClientData,
@@ -95,7 +95,7 @@ async fn main() -> std::io::Result<()> {
             .wrap(Logger::default())
             .wrap(cors)
             .app_data(app_data.clone())
-            .app_data(web::JsonConfig::default().error_handler(generic_app_error))
+            .app_data(web::JsonConfig::default().error_handler(generic_json_error))
             .service(
                 web::scope("/api")
                     .service(create)

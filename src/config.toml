@@ -3,4 +3,4 @@ admin_username = "admin"
 admin_password = "Password1"
 admin_jwt_secret = "secret"
 
-server_port=8090
+server_port = 8090

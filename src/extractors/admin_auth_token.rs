@@ -64,7 +64,7 @@ impl FromRequest for AdminAuthentication {
             &Validation::new(Algorithm::HS256),
         );
         match token_result {
-            Ok(token) => ready(Ok(AdminAuthentication {})),
+            Ok(_token) => ready(Ok(AdminAuthentication {})),
             Err(e) => {
                 println!("token_result Error: {:?}", e);
                 ready(Err(ErrorUnauthorized("Invalid authentication token sent!")))

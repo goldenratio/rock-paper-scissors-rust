@@ -7,6 +7,15 @@ pub struct GameCreator {
     pub player_token_id: i32,
 }
 
+impl Default for GameCreator {
+    fn default() -> Self {
+        Self {
+            game_id: 0,
+            player_token_id: 0
+        }
+    }
+}
+
 impl GameCreator {
     pub fn create_new_game(&mut self) -> Result<String, ParseError> {
         self.game_id += 1;

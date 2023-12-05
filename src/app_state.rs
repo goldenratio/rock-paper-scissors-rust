@@ -11,6 +11,16 @@ pub struct AdminInfo {
     pub admin_password: String,
 }
 
+impl AdminInfo {
+    pub fn new(settings: &ServerSettings) -> Self {
+        Self {
+            admin_jwt_secret: settings.admin_jwt_secret.clone(),
+            admin_username: settings.admin_username.clone(),
+            admin_password: settings.admin_password.clone(),
+        }
+    }
+}
+
 #[derive(Debug)]
 pub struct AppState {
     pub game_creator: Mutex<GameCreator>,
@@ -21,18 +31,9 @@ pub struct AppState {
 impl AppState {
     pub fn new(settings: &ServerSettings) -> AppState {
         AppState {
-            game_creator: Mutex::new(GameCreator {
-                game_id: 0,
-                player_token_id: 0,
-            }),
-            gameplay_manager: Mutex::new(GameplayManager {
-                game_entries: HashMap::new(),
-            }),
-            admin_info: Mutex::new(AdminInfo {
-                admin_jwt_secret: settings.admin_jwt_secret.clone(),
-                admin_username: settings.admin_username.clone(),
-                admin_password: settings.admin_password.clone(),
-            }),
+            game_creator: Mutex::new(GameCreator::default()),
+            gameplay_manager: Mutex::new(GameplayManager::default()),
+            admin_info: Mutex::new(AdminInfo::new(settings)),
         }
     }
 }

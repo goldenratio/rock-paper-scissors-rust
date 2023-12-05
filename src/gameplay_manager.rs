@@ -8,6 +8,14 @@ pub struct GameplayManager {
     pub game_entries: HashMap<String, GameEntry>,
 }
 
+impl Default for GameplayManager {
+    fn default() -> Self {
+        Self {
+            game_entries: HashMap::new()
+        }
+    }
+}
+
 impl GameplayManager {
     pub fn register_game(&mut self, game_id: &String) -> Result<(), CreateGameError> {
         if self.game_entries.contains_key(game_id) {

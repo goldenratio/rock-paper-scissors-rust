@@ -46,10 +46,13 @@ fn generic_json_error(err: JsonPayloadError, req: &HttpRequest) -> Error {
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     let settings = ServerSettings::default();
+    let admin_client_route = settings.admin_client_route.clone();
+
     let app_data = web::Data::new(AppState::new(&settings));
 
     let socket_addr = settings.get_socket_addr();
     println!("server is running on, {:?}", socket_addr.to_string());
+    println!("admin UI: , {:?}", format!("http://{socket_addr}{admin_client_route}"));
 
     let server = HttpServer::new(move || {
         let static_admin_client_files = generate();

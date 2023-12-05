@@ -11,9 +11,21 @@ pub struct ServerSettings {
     pub use_server_ip_v6: bool,
 }
 
+#[cfg(debug_assertions)]
 fn get_config_settings() -> HashMap<String, String> {
     let settings = Config::builder()
-        .add_source(config::File::with_name("src/config"))
+        .add_source(config::File::with_name("src/config-dev"))
+        .build()
+        .unwrap()
+        .try_deserialize::<HashMap<String, String>>()
+        .unwrap();
+    return settings;
+}
+
+#[cfg(not(debug_assertions))]
+fn get_config_settings() -> HashMap<String, String> {
+    let settings = Config::builder()
+        .add_source(config::File::with_name("src/config-prod"))
         .build()
         .unwrap()
         .try_deserialize::<HashMap<String, String>>()

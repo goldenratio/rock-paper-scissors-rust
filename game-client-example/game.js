@@ -1,6 +1,6 @@
 import { generateUsername } from './username-genrator.js';
 
-const apiPrefix = "http://localhost:8090/api"
+const apiPrefix = "http://localhost:8080/api"
 function main() {
   let gameId = '';
   let playerName = generateUsername();

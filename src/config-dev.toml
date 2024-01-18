@@ -3,5 +3,5 @@ admin_username = "admin"
 admin_password = "Password1"
 admin_jwt_secret = "AhYd]wP7sLn6c0bD9^X_onyWkVgY^b"
 
-server_port = "8090"
+server_port = "8080"
 use_server_ip_v6 = "false"

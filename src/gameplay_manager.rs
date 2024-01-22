@@ -11,7 +11,7 @@ pub struct GameplayManager {
 impl Default for GameplayManager {
     fn default() -> Self {
         Self {
-            game_entries: HashMap::new()
+            game_entries: HashMap::new(),
         }
     }
 }

@@ -11,7 +11,7 @@ impl Default for GameCreator {
     fn default() -> Self {
         Self {
             game_id: 0,
-            player_token_id: 0
+            player_token_id: 0,
         }
     }
 }

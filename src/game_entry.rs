@@ -8,6 +8,7 @@ pub struct PlayerInfo {
     pub player_token: String,
     pub history: Vec<PlayerAction>,
     pub current_action: Option<PlayerAction>,
+    pub score: i16,
 }
 
 #[derive(Debug)]
@@ -61,22 +62,38 @@ impl GameEntry {
             player_info.current_action = Option::from(player_action.clone());
 
             if self.both_players_made_current_action() {
-                let player1_action = self.player_1.current_action.as_mut().unwrap().clone();
-                self.player_1.history.push(player1_action);
+                let player_1 = &mut self.player_1;
+                let player1_action = player_1
+                    .current_action
+                    .take()
+                    .expect("No current action on player_1");
 
-                let player2_action = self.player_2.current_action.as_mut().unwrap().clone();
-                self.player_2.history.push(player2_action);
+                let mut player_2 = &mut self.player_2;
+                let player2_action = player_2
+                    .current_action
+                    .take()
+                    .expect("No current action on player_2");
 
-                // println!("player_1 {:?} player_2 {:?}", player1_action, player2_action);
+                player_1.history.push(player1_action.clone());
+                player_2.history.push(player2_action.clone());
 
                 // reset action
                 self.player_1.current_action = None;
                 self.player_2.current_action = None;
+
+                self.update_result(player1_action.clone(), player2_action.clone());
             }
 
             return Ok(());
         }
         return Err(GameActionError::GenericError);
+    }
+
+    fn update_result(&self, player_1_action: PlayerAction, player_2_action: PlayerAction) {
+        println!(
+            "update result (P1){:?} and (P2){:?}",
+            player_1_action, player_2_action
+        );
     }
 
     fn both_players_made_current_action(&self) -> bool {

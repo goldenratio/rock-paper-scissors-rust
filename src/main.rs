@@ -22,11 +22,8 @@ use crate::server_settings::ServerSettings;
 use actix_cors::Cors;
 use actix_web::error::{InternalError, JsonPayloadError};
 use actix_web::middleware::Logger;
-use actix_web::{
-    get, web, App, Error, HttpRequest, HttpResponse, HttpServer, Responder, ResponseError,
-};
+use actix_web::{get, web, App, Error, HttpRequest, HttpResponse, HttpServer, Responder};
 use actix_web_static_files::ResourceFiles;
-use std::str::FromStr;
 
 include!(concat!(env!("OUT_DIR"), "/generated.rs"));
 
@@ -52,7 +49,10 @@ async fn main() -> std::io::Result<()> {
 
     let socket_addr = settings.get_socket_addr();
     println!("server is running on, {:?}", socket_addr.to_string());
-    println!("admin UI: , {:?}", format!("http://{socket_addr}{admin_client_route}"));
+    println!(
+        "admin UI: , {:?}",
+        format!("http://{socket_addr}{admin_client_route}")
+    );
 
     let server = HttpServer::new(move || {
         let static_admin_client_files = generate();

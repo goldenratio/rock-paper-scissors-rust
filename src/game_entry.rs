@@ -1,5 +1,5 @@
 use crate::error_enums::{GameActionError, GameJoinError};
-use crate::player_action::PlayerAction;
+use crate::player_action::{Beats, PlayerAction};
 use serde::Serialize;
 
 #[derive(Debug, Clone, Default, Serialize)]
@@ -11,7 +11,7 @@ pub struct PlayerInfo {
     pub score: i16,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Eq, PartialEq)]
 pub enum GameResult {
     Win,
     Lose,
@@ -81,7 +81,25 @@ impl GameEntry {
                 self.player_1.current_action = None;
                 self.player_2.current_action = None;
 
-                self.update_result(player1_action.clone(), player2_action.clone());
+                let player1_result =
+                    self.is_player_won(player1_action.clone(), player2_action.clone());
+                println!("player_1 {:?}", player1_result);
+
+                match player1_result {
+                    GameResult::Win => {
+                        self.player_1.score += 1;
+                    }
+                    GameResult::Lose => {
+                        self.player_2.score += 1;
+                    }
+                    GameResult::Draw => {}
+                }
+
+                println!(
+                    "P1 score: {:?}, P2 score: {:?}",
+                    self.player_1.score, self.player_2.score
+                );
+                // dispatch SSE
             }
 
             return Ok(());
@@ -89,11 +107,19 @@ impl GameEntry {
         return Err(GameActionError::GenericError);
     }
 
-    fn update_result(&self, player_1_action: PlayerAction, player_2_action: PlayerAction) {
-        println!(
-            "update result (P1){:?} and (P2){:?}",
-            player_1_action, player_2_action
-        );
+    fn is_player_won(&self, own_action: PlayerAction, other_action: PlayerAction) -> GameResult {
+        // println!(
+        //     "update result (P1){:?} and (P2){:?}",
+        //     own_action, other_action
+        // );
+
+        let (own_beats, other_beats) = (own_action.beats(), other_action.beats());
+
+        match (own_beats, other_beats) {
+            _ if own_beats == other_action => GameResult::Win,
+            _ if other_beats == own_action => GameResult::Lose,
+            _ => GameResult::Draw,
+        }
     }
 
     fn both_players_made_current_action(&self) -> bool {

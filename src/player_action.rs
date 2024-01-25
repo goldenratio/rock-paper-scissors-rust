@@ -1,11 +1,26 @@
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Copy, Clone, Debug, Serialize, Deserialize, Eq, PartialEq)]
 pub enum PlayerAction {
     Rock,
     Paper,
     Scissors,
+}
+
+pub trait Beats {
+    fn beats(&self) -> Self;
+}
+
+impl Beats for PlayerAction {
+    fn beats(&self) -> PlayerAction {
+        // match is exhaustive, so every enum variant must be covered
+        match *self {
+            PlayerAction::Rock => PlayerAction::Scissors,
+            PlayerAction::Paper => PlayerAction::Rock,
+            PlayerAction::Scissors => PlayerAction::Paper,
+        }
+    }
 }
 
 impl FromStr for PlayerAction {

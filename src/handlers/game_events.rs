@@ -1,6 +1,8 @@
-use actix_web::{post, HttpResponse, Responder};
+use actix_web::{Responder, web, get};
+use crate::game_event_broadcast::Broadcaster;
 
-#[post("/game_events")]
-async fn game_events(_req_body: String) -> impl Responder {
-    HttpResponse::Ok().body("hello SSE game_events!")
+#[get("/game_events/{game_id}")]
+async fn game_events(path: web::Path<String>, broadcaster: web::Data<Broadcaster>) -> impl Responder {
+    let game_id = path.into_inner();
+    broadcaster.new_client(game_id.clone()).await
 }

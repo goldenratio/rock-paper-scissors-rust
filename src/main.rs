@@ -8,7 +8,9 @@ mod gameplay_manager;
 mod handlers;
 mod player_action;
 mod server_settings;
+mod game_event_broadcast;
 
+use std::sync::Arc;
 use crate::admin_handlers::gameplay_info::gameplay_info;
 use crate::handlers::create::create;
 use crate::handlers::game_action::game_action;
@@ -24,6 +26,7 @@ use actix_web::error::{InternalError, JsonPayloadError};
 use actix_web::middleware::Logger;
 use actix_web::{get, web, App, Error, HttpRequest, HttpResponse, HttpServer, Responder};
 use actix_web_static_files::ResourceFiles;
+use crate::game_event_broadcast::Broadcaster;
 
 include!(concat!(env!("OUT_DIR"), "/generated.rs"));
 
@@ -46,6 +49,7 @@ async fn main() -> std::io::Result<()> {
     let admin_client_route = settings.admin_client_route.clone();
 
     let app_data = web::Data::new(AppState::new(&settings));
+    let broadcast_data = Broadcaster::create();
 
     let socket_addr = settings.get_socket_addr();
     println!("server is running on, {:?}", socket_addr.to_string());
@@ -66,6 +70,7 @@ async fn main() -> std::io::Result<()> {
             .wrap(Logger::default())
             .wrap(cors)
             .app_data(app_data.clone())
+            .app_data(web::Data::from(Arc::clone(&broadcast_data)))
             .app_data(web::JsonConfig::default().error_handler(generic_json_error))
             .service(
                 web::scope("/api")

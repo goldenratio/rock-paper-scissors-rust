@@ -28,6 +28,7 @@ function main() {
     let jsonData = await sendPostRequest(`${apiPrefix}/join`, { gameId: gameIdTextEl.value, playerName: playerNameTextEl.value });
     console.log(`/join ${gameIdTextEl.value}: `, JSON.stringify(jsonData));
     playerToken = jsonData?.data?.playerToken || '';
+    onGameJoined(gameId);
   });
 
   [... document.getElementsByClassName('action-btn')].forEach(el => {
@@ -37,6 +38,16 @@ function main() {
       console.log(`/game_action ${actionType}: `, JSON.stringify(jsonData));
     });
   });
+}
+
+/**
+ * @param {string} gameId
+ */
+function onGameJoined(gameId) {
+  const events = new EventSource(`${apiPrefix}/game_events/${gameId}`);
+  events.onmessage = (event) => {
+    console.log(event.data);
+  }
 }
 
 async function sendPostRequest(url, payload) {
